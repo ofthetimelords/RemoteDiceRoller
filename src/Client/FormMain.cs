@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -13,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Shared;
+using TheQ.DiceRoller.Client;
 using TheQ.DiceRoller.Shared;
 
 
@@ -25,6 +28,17 @@ namespace TheQ.RemoteDiceRoller
         private ClientState CurrentState { get; set; }
         private CancellationTokenSource DefaultToken { get; set; } = new CancellationTokenSource();
 
+        private SoundPlayer[] DiceSound { get; } = new[]
+        {
+            new SoundPlayer(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Media\\1.wav")),
+            new SoundPlayer(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Media\\2.wav")),
+            new SoundPlayer(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Media\\3.wav")),
+            new SoundPlayer(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Media\\4.wav")),
+            new SoundPlayer(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Media\\5.wav")),
+            new SoundPlayer(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Media\\6.wav")),
+            new SoundPlayer(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Media\\Lots.wav"))
+        };
+
         public FormMain()
         {
             this.InitializeComponent();
@@ -32,8 +46,13 @@ namespace TheQ.RemoteDiceRoller
 
         private async void Connect_Click(object sender, EventArgs e)
         {
+            var url = string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["ServerUrl"]) ? "localhost" : ConfigurationManager.AppSettings["ServerUrl"];
+            var port = string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["ServerPort"]) ? 5001 : int.Parse(ConfigurationManager.AppSettings["ServerPort"]);
+            var authKey = ConfigurationManager.AppSettings["AuthKey"];
+
             this.DefaultToken.Cancel();
             this.Connect.Enabled = false;
+            this.ChangeConnectionStatus(false);
 
             if (this.OutgoingSocket != null)
             {
@@ -44,13 +63,23 @@ namespace TheQ.RemoteDiceRoller
 
             this.OutgoingSocket = new TcpClient();
 
-            await this.OutgoingSocket.ConnectAsync("localhost", 5001);
+            try
+            {
+                await this.OutgoingSocket.ConnectAsync(url, port);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Server didn't respond; connection failed", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             this.OutgoingSocket.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             this.OutgoingSocket.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
             this.OutgoingSocket.NoDelay = true;
             this.Connect.Enabled = true;
             this.DefaultToken = new CancellationTokenSource();
             this.Dice.Enabled = true;
+
 
             try
             {
@@ -67,27 +96,73 @@ namespace TheQ.RemoteDiceRoller
                     var response = await this.OutgoingSocket.WaitForReply(this.DefaultToken.Token);
                     this.AddToLog("Server: " + response);
 
-                    if (response.EndsWith("#AUTH"))
+                    if (response.EndsWith("#AUTH#"))
                     {
-                        await this.OutgoingSocket.SendMessage("100101", this.DefaultToken.Token);
+                        this.AddToLog("Me: " + authKey);
+                        await this.OutgoingSocket.SendMessage(authKey, this.DefaultToken.Token);
                     }
-                    else if (response.EndsWith("#ID"))
+                    else if (response.EndsWith("#ID#"))
                     {
-                        await this.OutgoingSocket.SendMessage("James", this.DefaultToken.Token);
+                        this.AddToLog("Me: " + this.TextName.Text);
+                        await this.OutgoingSocket.SendMessage(this.TextName.Text, this.DefaultToken.Token);
                     }
-                    else if (response.StartsWith("#RESULT"))
+                    else if (response.EndsWith("#CONNECTED#"))
                     {
-                        var message = JsonConvert.DeserializeObject<ResultMessage>(response.Substring("#RESULT".Length));
-
-                        this.TempLabel.Text = response;
+                        this.ChangeConnectionStatus(true);
+                    }
+                    else if (response.EndsWith("#DISCONNECTED#"))
+                    {
+                        this.ChangeConnectionStatus(false);
+                        return;
+                    }
+                    else if (response.StartsWith("#RESULT#"))
+                    {
+                        var message = JsonConvert.DeserializeObject<ResultMessage>(response.Substring("#RESULT#".Length));
+                        var noofDice = (message.Dice.Count > 7 ? 7 : message.Dice.Count) - 1;
+                        this.DiceSound[noofDice].Play();
+                        this.ShowDice(message.Dice, message.DiceType);
+                        this.LastRollSum.Text = message.Dice.Sum().ToString();
+                        this.LastRollBy.Text = message.From;
                     }
                 }
             }
             catch (Exception ex)
             {
+                this.DefaultToken.Cancel();
+
+                if (this.IsDisposed)
+                    return;
+
                 this.AddToLog($"Server: Unhandled exception: {ex.Message}");
                 this.Dice.Enabled = false;
-                this.DefaultToken.Cancel();
+                this.ChangeConnectionStatus(false);
+            }
+        }
+
+
+        private void ChangeConnectionStatus(bool connected)
+        {
+            if (!connected)
+            {
+                this.ConnStatus.ForeColor = Color.Red;
+                this.ConnStatus.Text = "Disconnected";
+            }
+            else
+            {
+                this.ConnStatus.ForeColor = Color.Lime;
+                this.ConnStatus.Text = "Connected";
+            }
+        }
+
+        private void ShowDice(IList<int> results, DiceType dice)
+        {
+            this.DiceResults.Controls.Clear();
+            foreach (var die in results)
+            {
+                var face = new DiceFace();
+                face.Height = face.Width = this.DiceResults.Height > 120 ? 120 : this.DiceResults.Height - 10;
+                face.SetNumber(dice, die);
+                this.DiceResults.Controls.Add(face);
             }
         }
 
@@ -98,7 +173,7 @@ namespace TheQ.RemoteDiceRoller
 
         private async void RollD4_Click(object sender, EventArgs e)
         {
-            await this.OutgoingSocket.SendMessage("#ROLL" + JsonConvert.SerializeObject(new RollMessage
+            await this.OutgoingSocket.SendMessage("#ROLL#" + JsonConvert.SerializeObject(new RollMessage
             {
                 AmountOfDice = (int) this.D4Amount.Value,
                 Dice = DiceType.D4
@@ -107,7 +182,7 @@ namespace TheQ.RemoteDiceRoller
 
         private async void RollD20_Click(object sender, EventArgs e)
         {
-            await this.OutgoingSocket.SendMessage("#ROLL" + JsonConvert.SerializeObject(new RollMessage
+            await this.OutgoingSocket.SendMessage("#ROLL#" + JsonConvert.SerializeObject(new RollMessage
             {
                 AmountOfDice = (int) this.D20Amount.Value,
                 Dice = DiceType.D20
@@ -116,7 +191,7 @@ namespace TheQ.RemoteDiceRoller
 
         private async void RollD12_Click(object sender, EventArgs e)
         {
-            await this.OutgoingSocket.SendMessage("#ROLL" + JsonConvert.SerializeObject(new RollMessage
+            await this.OutgoingSocket.SendMessage("#ROLL#" + JsonConvert.SerializeObject(new RollMessage
             {
                 AmountOfDice = (int) this.D12Amount.Value,
                 Dice = DiceType.D12
@@ -125,7 +200,7 @@ namespace TheQ.RemoteDiceRoller
 
         private async void RollD100_Click(object sender, EventArgs e)
         {
-            await this.OutgoingSocket.SendMessage("#ROLL" + JsonConvert.SerializeObject(new RollMessage
+            await this.OutgoingSocket.SendMessage("#ROLL#" + JsonConvert.SerializeObject(new RollMessage
             {
                 AmountOfDice = (int) this.D100Amount.Value,
                 Dice = DiceType.D100
@@ -134,7 +209,7 @@ namespace TheQ.RemoteDiceRoller
 
         private async void RollD6_Click(object sender, EventArgs e)
         {
-            await this.OutgoingSocket.SendMessage("#ROLL" + JsonConvert.SerializeObject(new RollMessage
+            await this.OutgoingSocket.SendMessage("#ROLL#" + JsonConvert.SerializeObject(new RollMessage
             {
                 AmountOfDice = (int) this.D6Amount.Value,
                 Dice = DiceType.D6
@@ -143,7 +218,7 @@ namespace TheQ.RemoteDiceRoller
 
         private async void RollD8_Click(object sender, EventArgs e)
         {
-            await this.OutgoingSocket.SendMessage("#ROLL" + JsonConvert.SerializeObject(new RollMessage
+            await this.OutgoingSocket.SendMessage("#ROLL#" + JsonConvert.SerializeObject(new RollMessage
             {
                 AmountOfDice = (int) this.D8Amount.Value,
                 Dice = DiceType.D8
@@ -152,11 +227,17 @@ namespace TheQ.RemoteDiceRoller
 
         private async void RollD10_Click(object sender, EventArgs e)
         {
-            await this.OutgoingSocket.SendMessage("#ROLL" + JsonConvert.SerializeObject(new RollMessage
+            await this.OutgoingSocket.SendMessage("#ROLL#" + JsonConvert.SerializeObject(new RollMessage
             {
                 AmountOfDice = (int) this.D10Amount.Value,
                 Dice = DiceType.D10
             }), this.DefaultToken.Token);
+        }
+
+        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            this.OutgoingSocket.Close();
+            Application.DoEvents();
         }
     }
 }

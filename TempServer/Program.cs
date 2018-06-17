@@ -5,10 +5,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Mime;
 using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Newtonsoft.Json;
 using Shared;
 using TheQ.DiceRoller.Shared;
@@ -20,6 +23,7 @@ namespace TheQ.DiceRoller.TempServer
     {
         private ConcurrentDictionary<TcpClient, ClientState> Connections = new ConcurrentDictionary<TcpClient, ClientState>();
         private Func<int, int> Generator;
+        private string AuthKey;
 
         public static async Task Main(string[] args)
         {
@@ -29,11 +33,15 @@ namespace TheQ.DiceRoller.TempServer
 
         private async Task Run()
         {
+            var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
+            this.AuthKey = config["AuthKey"];
+            var port = int.Parse(config["ListenPort"]);
+
             this.DefineRandomGenerator();
             if (this.Generator == null)
                 this.Generator = dice => this.Rnd.Next(1, dice + 1);
 
-            this.InputSocket = new TcpListener(IPAddress.Any, 5001);
+            this.InputSocket = new TcpListener(IPAddress.Any, port);
             this.InputSocket.AllowNatTraversal(true);
             this.InputSocket.Start(10);
 
@@ -58,6 +66,7 @@ namespace TheQ.DiceRoller.TempServer
                 CurrentState = State.MustAuthenticate
             });
             Console.WriteLine($"Client connected with IP: {input.Client.RemoteEndPoint}");
+            await input.SendMessage("Welcome to the Dice Server" + Environment.NewLine, CancellationToken.None);
 
             using (input)
             {
@@ -70,42 +79,51 @@ namespace TheQ.DiceRoller.TempServer
                             case State.MustAuthenticate:
                             {
                                 Console.WriteLine("Requesting that client authenticates");
-                                await input.SendMessage("#AUTH", CancellationToken.None);
+                                await input.SendMessage("#AUTH#", CancellationToken.None);
                                 var response = await input.WaitForReply(CancellationToken.None);
 
                                 Console.WriteLine($"Client responded with {response}");
-                                if (response == "100101")
+                                if (response == this.AuthKey)
                                     state.CurrentState = State.MustIdentify;
                                 else
-                                    await input.SendMessage("Invalid ID", CancellationToken.None);
+                                    await input.SendMessage("#DISCONNECTED#", CancellationToken.None);
                                 break;
                             }
                             case State.MustIdentify:
                             {
                                 Console.WriteLine("Client must declare an ID");
-                                await input.SendMessage("#ID", CancellationToken.None);
+                                await input.SendMessage("#ID#", CancellationToken.None);
                                 var response = await input.WaitForReply(CancellationToken.None);
 
                                 Console.WriteLine($"Client responded with {response}");
                                 state.CurrentState = State.Ready;
                                 state.Id = response;
+
+                                await input.SendMessage("#CONNECTED#", CancellationToken.None);
                                 break;
                             }
                             case State.Ready:
                             {
                                 var response = await input.WaitForReply(CancellationToken.None);
+                                Console.WriteLine($"Client {state.Id} sent a command: {response}");
 
-                                if (response.StartsWith("#ROLL"))
+                                if (response.StartsWith("#ROLL#"))
                                 {
-                                    var message = JsonConvert.DeserializeObject<RollMessage>(response.Substring("#ROLL".Length));
+                                    var message = JsonConvert.DeserializeObject<RollMessage>(response.Substring("#ROLL#".Length));
+                                    Console.WriteLine($"Client {state.Id} requested to roll {message.AmountOfDice} {message.Dice}");
+
                                     var res = new ResultMessage
                                     {
                                         Dice = this.RollDice(message.AmountOfDice, message.Dice),
+                                        DiceType = message.Dice,
                                         From = state.Id
                                     };
 
-                                    await Task.WhenAll(this.Connections.Where(c => c.Value.CurrentState == State.Ready).Select(conn => conn.Key.SendMessage("#RESULT" + JsonConvert.SerializeObject(res), CancellationToken.None)));
+                                    var serRes = JsonConvert.SerializeObject(res);
+                                    Console.WriteLine($"Sending {serRes} to all clients");
+                                    await Task.WhenAll(this.Connections.Where(c => c.Value.CurrentState == State.Ready).Select(conn => conn.Key.SendMessage("#RESULT#" + serRes, CancellationToken.None)));
                                 }
+
                                 break;
                             }
                         }
@@ -113,7 +131,7 @@ namespace TheQ.DiceRoller.TempServer
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Unhandled exception: {ex.Message} by {input.Client.RemoteEndPoint} - {state.Id}");
+                    Console.WriteLine($"Unhandled exception: {ex.Message} by {input.Client.RemoteEndPoint} - {state.Id}. Disconnecting this client!");
                     input.Close();
                     this.Connections.TryRemove(input, out var value);
                 }

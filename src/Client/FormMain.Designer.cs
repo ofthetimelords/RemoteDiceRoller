@@ -29,10 +29,11 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.Connect = new System.Windows.Forms.Button();
             this.TempLabel = new System.Windows.Forms.Label();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.DiceResults = new System.Windows.Forms.FlowLayoutPanel();
             this.SysLog = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -56,7 +57,12 @@
             this.RollD20 = new System.Windows.Forms.Button();
             this.RollD100 = new System.Windows.Forms.Button();
             this.Dice = new System.Windows.Forms.GroupBox();
-            this.flowLayoutPanel1.SuspendLayout();
+            this.TextName = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.LastRollBy = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.LastRollSum = new System.Windows.Forms.TextBox();
+            this.ConnStatus = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.D4Amount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.D6Amount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.D8Amount)).BeginInit();
@@ -85,97 +91,110 @@
             // TempLabel
             // 
             this.TempLabel.AutoSize = true;
-            this.TempLabel.Location = new System.Drawing.Point(3, 0);
+            this.TempLabel.Location = new System.Drawing.Point(12, 60);
             this.TempLabel.Name = "TempLabel";
             this.TempLabel.Size = new System.Drawing.Size(35, 13);
             this.TempLabel.TabIndex = 1;
-            this.TempLabel.Text = "label1";
+            this.TempLabel.Text = "Name";
             // 
-            // flowLayoutPanel1
+            // DiceResults
             // 
-            this.flowLayoutPanel1.Controls.Add(this.TempLabel);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(12, 131);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(628, 81);
-            this.flowLayoutPanel1.TabIndex = 3;
+            this.DiceResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.DiceResults.AutoScroll = true;
+            this.DiceResults.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("DiceResults.BackgroundImage")));
+            this.DiceResults.Location = new System.Drawing.Point(4, 102);
+            this.DiceResults.Name = "DiceResults";
+            this.DiceResults.Size = new System.Drawing.Size(869, 97);
+            this.DiceResults.TabIndex = 3;
             // 
             // SysLog
             // 
+            this.SysLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.SysLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
-            this.SysLog.Location = new System.Drawing.Point(646, 12);
+            this.SysLog.Location = new System.Drawing.Point(646, 2);
             this.SysLog.Multiline = true;
             this.SysLog.Name = "SysLog";
             this.SysLog.ReadOnly = true;
             this.SysLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.SysLog.Size = new System.Drawing.Size(154, 200);
+            this.SysLog.Size = new System.Drawing.Size(227, 38);
             this.SysLog.TabIndex = 4;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 16);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.label1.Location = new System.Drawing.Point(7, 11);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(19, 13);
+            this.label1.Size = new System.Drawing.Size(64, 28);
             this.label1.TabIndex = 5;
             this.label1.Text = "d4";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(89, 16);
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.label2.Location = new System.Drawing.Point(82, 11);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(19, 13);
+            this.label2.Size = new System.Drawing.Size(64, 28);
             this.label2.TabIndex = 5;
             this.label2.Text = "d6";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(165, 16);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.label3.Location = new System.Drawing.Point(162, 11);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(19, 13);
+            this.label3.Size = new System.Drawing.Size(64, 28);
             this.label3.TabIndex = 5;
             this.label3.Text = "d8";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(241, 16);
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.label4.Location = new System.Drawing.Point(237, 11);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(25, 13);
+            this.label4.Size = new System.Drawing.Size(70, 28);
             this.label4.TabIndex = 5;
             this.label4.Text = "d10";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label5
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(323, 16);
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.label5.Location = new System.Drawing.Point(318, 11);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(25, 13);
+            this.label5.Size = new System.Drawing.Size(70, 28);
             this.label5.TabIndex = 5;
             this.label5.Text = "d12";
+            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label6
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(405, 16);
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.label6.Location = new System.Drawing.Point(399, 11);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(25, 13);
+            this.label6.Size = new System.Drawing.Size(70, 28);
             this.label6.TabIndex = 5;
             this.label6.Text = "d20";
+            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label7
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(487, 16);
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.label7.Location = new System.Drawing.Point(483, 11);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(31, 13);
+            this.label7.Size = new System.Drawing.Size(58, 28);
             this.label7.TabIndex = 5;
             this.label7.Text = "d100";
+            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // D4Amount
             // 
-            this.D4Amount.Location = new System.Drawing.Point(16, 47);
+            this.D4Amount.Location = new System.Drawing.Point(16, 42);
             this.D4Amount.Minimum = new decimal(new int[] {
             1,
             0,
@@ -192,7 +211,7 @@
             // 
             // D6Amount
             // 
-            this.D6Amount.Location = new System.Drawing.Point(92, 47);
+            this.D6Amount.Location = new System.Drawing.Point(95, 42);
             this.D6Amount.Minimum = new decimal(new int[] {
             1,
             0,
@@ -209,7 +228,7 @@
             // 
             // D8Amount
             // 
-            this.D8Amount.Location = new System.Drawing.Point(168, 47);
+            this.D8Amount.Location = new System.Drawing.Point(174, 42);
             this.D8Amount.Minimum = new decimal(new int[] {
             1,
             0,
@@ -226,7 +245,7 @@
             // 
             // D10Amount
             // 
-            this.D10Amount.Location = new System.Drawing.Point(244, 47);
+            this.D10Amount.Location = new System.Drawing.Point(253, 42);
             this.D10Amount.Minimum = new decimal(new int[] {
             1,
             0,
@@ -243,7 +262,7 @@
             // 
             // D12Amount
             // 
-            this.D12Amount.Location = new System.Drawing.Point(326, 47);
+            this.D12Amount.Location = new System.Drawing.Point(332, 42);
             this.D12Amount.Minimum = new decimal(new int[] {
             1,
             0,
@@ -260,7 +279,7 @@
             // 
             // D20Amount
             // 
-            this.D20Amount.Location = new System.Drawing.Point(408, 47);
+            this.D20Amount.Location = new System.Drawing.Point(411, 42);
             this.D20Amount.Minimum = new decimal(new int[] {
             1,
             0,
@@ -277,7 +296,7 @@
             // 
             // D100Amount
             // 
-            this.D100Amount.Location = new System.Drawing.Point(490, 47);
+            this.D100Amount.Location = new System.Drawing.Point(490, 42);
             this.D100Amount.Minimum = new decimal(new int[] {
             1,
             0,
@@ -294,7 +313,7 @@
             // 
             // RollD4
             // 
-            this.RollD4.Location = new System.Drawing.Point(16, 74);
+            this.RollD4.Location = new System.Drawing.Point(16, 69);
             this.RollD4.Name = "RollD4";
             this.RollD4.Size = new System.Drawing.Size(44, 23);
             this.RollD4.TabIndex = 7;
@@ -304,7 +323,7 @@
             // 
             // RollD6
             // 
-            this.RollD6.Location = new System.Drawing.Point(92, 74);
+            this.RollD6.Location = new System.Drawing.Point(95, 69);
             this.RollD6.Name = "RollD6";
             this.RollD6.Size = new System.Drawing.Size(44, 23);
             this.RollD6.TabIndex = 7;
@@ -314,7 +333,7 @@
             // 
             // RollD8
             // 
-            this.RollD8.Location = new System.Drawing.Point(168, 74);
+            this.RollD8.Location = new System.Drawing.Point(174, 69);
             this.RollD8.Name = "RollD8";
             this.RollD8.Size = new System.Drawing.Size(44, 23);
             this.RollD8.TabIndex = 7;
@@ -324,7 +343,7 @@
             // 
             // RollD10
             // 
-            this.RollD10.Location = new System.Drawing.Point(244, 74);
+            this.RollD10.Location = new System.Drawing.Point(253, 69);
             this.RollD10.Name = "RollD10";
             this.RollD10.Size = new System.Drawing.Size(44, 23);
             this.RollD10.TabIndex = 7;
@@ -334,7 +353,7 @@
             // 
             // RollD12
             // 
-            this.RollD12.Location = new System.Drawing.Point(326, 74);
+            this.RollD12.Location = new System.Drawing.Point(332, 69);
             this.RollD12.Name = "RollD12";
             this.RollD12.Size = new System.Drawing.Size(44, 23);
             this.RollD12.TabIndex = 7;
@@ -344,7 +363,7 @@
             // 
             // RollD20
             // 
-            this.RollD20.Location = new System.Drawing.Point(408, 74);
+            this.RollD20.Location = new System.Drawing.Point(411, 69);
             this.RollD20.Name = "RollD20";
             this.RollD20.Size = new System.Drawing.Size(44, 23);
             this.RollD20.TabIndex = 7;
@@ -354,7 +373,7 @@
             // 
             // RollD100
             // 
-            this.RollD100.Location = new System.Drawing.Point(490, 74);
+            this.RollD100.Location = new System.Drawing.Point(490, 69);
             this.RollD100.Name = "RollD100";
             this.RollD100.Size = new System.Drawing.Size(44, 23);
             this.RollD100.TabIndex = 7;
@@ -386,26 +405,95 @@
             this.Dice.Controls.Add(this.D8Amount);
             this.Dice.Controls.Add(this.D10Amount);
             this.Dice.Enabled = false;
-            this.Dice.Location = new System.Drawing.Point(93, 12);
+            this.Dice.Location = new System.Drawing.Point(93, 1);
             this.Dice.Name = "Dice";
-            this.Dice.Size = new System.Drawing.Size(547, 113);
+            this.Dice.Size = new System.Drawing.Size(547, 95);
             this.Dice.TabIndex = 8;
             this.Dice.TabStop = false;
             this.Dice.Text = "Dice";
             // 
-            // Form1
+            // TextName
+            // 
+            this.TextName.Location = new System.Drawing.Point(12, 76);
+            this.TextName.Name = "TextName";
+            this.TextName.Size = new System.Drawing.Size(75, 20);
+            this.TextName.TabIndex = 9;
+            this.TextName.Text = "?";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(646, 49);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(66, 13);
+            this.label8.TabIndex = 1;
+            this.label8.Text = "Last Roll By:";
+            // 
+            // LastRollBy
+            // 
+            this.LastRollBy.Location = new System.Drawing.Point(710, 46);
+            this.LastRollBy.Name = "LastRollBy";
+            this.LastRollBy.ReadOnly = true;
+            this.LastRollBy.Size = new System.Drawing.Size(100, 20);
+            this.LastRollBy.TabIndex = 9;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(672, 79);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(75, 13);
+            this.label9.TabIndex = 1;
+            this.label9.Text = "Last Roll Sum:";
+            // 
+            // LastRollSum
+            // 
+            this.LastRollSum.BackColor = System.Drawing.SystemColors.ControlText;
+            this.LastRollSum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.LastRollSum.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.LastRollSum.ForeColor = System.Drawing.SystemColors.Control;
+            this.LastRollSum.Location = new System.Drawing.Point(753, 74);
+            this.LastRollSum.Name = "LastRollSum";
+            this.LastRollSum.ReadOnly = true;
+            this.LastRollSum.Size = new System.Drawing.Size(57, 22);
+            this.LastRollSum.TabIndex = 9;
+            // 
+            // ConnStatus
+            // 
+            this.ConnStatus.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.ConnStatus.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ConnStatus.ForeColor = System.Drawing.Color.Red;
+            this.ConnStatus.Location = new System.Drawing.Point(12, 38);
+            this.ConnStatus.Name = "ConnStatus";
+            this.ConnStatus.Size = new System.Drawing.Size(75, 21);
+            this.ConnStatus.TabIndex = 10;
+            this.ConnStatus.Text = "Disconnected";
+            this.ConnStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(813, 224);
+            this.ClientSize = new System.Drawing.Size(876, 201);
+            this.Controls.Add(this.ConnStatus);
+            this.Controls.Add(this.LastRollSum);
+            this.Controls.Add(this.LastRollBy);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.TextName);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.TempLabel);
             this.Controls.Add(this.Dice);
             this.Controls.Add(this.SysLog);
-            this.Controls.Add(this.flowLayoutPanel1);
+            this.Controls.Add(this.DiceResults);
             this.Controls.Add(this.Connect);
-            this.Name = "Form1";
-            this.Text = "Form1";
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel1.PerformLayout();
+            this.DoubleBuffered = true;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
+            this.Name = "FormMain";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Dice Roller Client";
+            this.TopMost = true;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.D4Amount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.D6Amount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.D8Amount)).EndInit();
@@ -414,7 +502,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.D20Amount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.D100Amount)).EndInit();
             this.Dice.ResumeLayout(false);
-            this.Dice.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -425,7 +512,7 @@
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.Button Connect;
         private System.Windows.Forms.Label TempLabel;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.FlowLayoutPanel DiceResults;
         private System.Windows.Forms.TextBox SysLog;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
@@ -449,6 +536,12 @@
         private System.Windows.Forms.Button RollD20;
         private System.Windows.Forms.Button RollD100;
         private System.Windows.Forms.GroupBox Dice;
+        private System.Windows.Forms.TextBox TextName;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox LastRollBy;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox LastRollSum;
+        private System.Windows.Forms.Label ConnStatus;
     }
 }
 
