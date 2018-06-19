@@ -100,29 +100,29 @@ namespace TheQ.RemoteDiceRoller
                     {
                         this.AddToLog("Server: " + response);
 
-                        if (response.EndsWith("#AUTH#"))
+                        if (response == "#AUTH#")
                         {
                             this.AddToLog("Me: " + authKey);
                             await socket.SendMessage(authKey, this.DefaultToken.Token);
                         }
-                        else if (response.EndsWith("#ID#"))
+                        else if (response == "#ID#")
                         {
                             this.AddToLog("Me: " + this.TextName.Text);
                             await socket.SendMessage(this.TextName.Text, this.DefaultToken.Token);
                         }
-                        else if (response.EndsWith("#CONNECTED#"))
+                        else if (response == "#CONNECTED#")
                         {
                             this.ChangeConnectionStatus(true);
                         }
-                        else if (response.EndsWith("#CONNECTEDCLIENT#"))
+                        else if (response.StartsWith("#CONNECTEDCLIENT#"))
                         {
                         }
-                        else if (response.EndsWith("#DISCONNECTED#"))
+                        else if (response == "#DISCONNECTED#")
                         {
                             this.ChangeConnectionStatus(false);
                             return;
                         }
-                        else if (response.EndsWith("#DISCONNECTEDCLIENT#"))
+                        else if (response.StartsWith("#DISCONNECTEDCLIENT#"))
                         {
                         }
                         else if (response.StartsWith("#RESULT#"))

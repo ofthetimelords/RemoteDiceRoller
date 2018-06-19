@@ -158,9 +158,20 @@ namespace TheQ.DiceRoller.TempServer
 
         private async Task DisconnectClient(TcpClient input)
         {
-            input.Close();
+            if (input.Connected)
+                input.Close();
+
             this.Connections.TryRemove(input, out var value);
-            await Task.WhenAll(this.Connections.Where(c => c.Value.CurrentState == State.Ready && c.Key.Connected).Select(conn => conn.Key.SendMessage("#DISCONNECTEDCLIENT#" + conn.Value.Id, CancellationToken.None)));
+            try
+            {
+                var tasks = this.Connections.Where(c => c.Value.CurrentState == State.Ready && c.Key.Connected).Select(conn => conn.Key.SendMessage("#DISCONNECTEDCLIENT#" + conn.Value.Id, CancellationToken.None));
+
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         private Random Rnd = new Random();
