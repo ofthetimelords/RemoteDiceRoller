@@ -13,43 +13,56 @@ namespace TheQ.DiceRoller.Shared
     {
         public static async Task<bool> SendMessage(this TcpClient client, string message, CancellationToken token)
         {
+            if (!client.Connected)
+                return false;
+
             var stream = client.GetStream();
-            var bytes = Encoding.UTF8.GetBytes(message + (char) 4);
+            var bytes = Encoding.UTF8.GetBytes(message + (char)4);
             await stream.WriteAsync(bytes, 0, bytes.Length, token);
             return true;
         }
 
-        public static async Task<string> WaitForReply(this TcpClient client, CancellationToken token)
+        public static async Task<IList<string>> WaitForReplies(this TcpClient client, CancellationToken token)
         {
+            if (!client.Connected)
+                return null;
+
             var message = new byte[2048];
             var buffer = new byte[2048];
             var position = 0;
 
             while (true)
             {
-                var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2000));
-                var combinedToken = CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
-
-                if (!client.Connected)
-                    throw new InvalidOperationException("Connection dropped");
-
-                token.ThrowIfCancellationRequested();
-
-                var segment = new ArraySegment<byte>(buffer);
-                var read = await Task.Run(() => client.Client.ReceiveAsync(segment, SocketFlags.None), combinedToken.Token);
-
-                if (read > 0)
+                using (var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2000)))
                 {
-                    int oldPos = position;
-                    position += read - 1;
+                    var combinedToken = CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
 
-                    if (position > message.Length)
-                        Array.Resize(ref message, position + 1);
+                    if (!client.Connected)
+                        throw new InvalidOperationException("Connection dropped");
 
-                    Array.Copy(buffer, 0, message, oldPos, read);
+                    token.ThrowIfCancellationRequested();
 
-                    if (message[position] == 4)
-                        return Encoding.UTF8.GetString(message, 0, position);
+                    var segment = new ArraySegment<byte>(buffer);
+                    var read = await client.Client.ReceiveAsync(segment, SocketFlags.None);
+
+                    if (read > 0)
+                    {
+                        int oldPos = position;
+                        position += read - 1;
+
+                        if (position > message.Length)
+                            Array.Resize(ref message, position + 1);
+
+                        Array.Copy(buffer, 0, message, oldPos, read);
+
+                        if (message[position] == 4)
+                        {
+                            var response = Encoding.UTF8.GetString(message, 0, position);
+                            return response.Split((char) 4);
+                        }
+                    }
+                    else
+                        await Task.Delay(500, combinedToken.Token);
                 }
             }
         }
