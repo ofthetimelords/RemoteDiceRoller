@@ -69,6 +69,7 @@ namespace TheQ.DiceRoller.TempServer
             await input.SendMessage("Welcome to the Dice Server" + Environment.NewLine, CancellationToken.None);
 
             using (input)
+            using (input.GetStream())
             {
                 try
                 {
@@ -121,7 +122,20 @@ namespace TheQ.DiceRoller.TempServer
 
                                     var serRes = JsonConvert.SerializeObject(res);
                                     Console.WriteLine($"Sending {serRes} to all clients");
-                                    await Task.WhenAll(this.Connections.Where(c => c.Value.CurrentState == State.Ready).Select(conn => conn.Key.SendMessage("#RESULT#" + serRes, CancellationToken.None)));
+                                    await Task.WhenAll(this.Connections.Where(c => c.Value.CurrentState == State.Ready && c.Key.Connected).Select(conn => conn.Key.SendMessage("#RESULT#" + serRes, CancellationToken.None)));
+
+                                    // Discard any disconnected clients, just in case.
+                                    foreach (var disconnected in this.Connections.Where(c => !c.Key.Connected).ToList())
+                                    {
+                                        try
+                                        {
+                                            this.Connections.TryRemove(disconnected.Key, out var value);
+                                            disconnected.Key.Close();
+                                        }
+                                        catch (Exception)
+                                        {
+                                        }
+                                    }
                                 }
 
                                 break;
@@ -131,7 +145,7 @@ namespace TheQ.DiceRoller.TempServer
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Unhandled exception: {ex.Message} by {input.Client.RemoteEndPoint} - {state.Id}. Disconnecting this client!");
+                    Console.WriteLine($"Unhandled exception: {ex.Message} by {(input.Connected ? input.Client?.RemoteEndPoint.ToString() : "?")} - {state.Id}. Disconnecting this client!");
                     input.Close();
                     this.Connections.TryRemove(input, out var value);
                 }
@@ -140,7 +154,7 @@ namespace TheQ.DiceRoller.TempServer
 
         private Random Rnd = new Random();
 
-        private IList<int> RollDice(int amount, DiceType dice) => Enumerable.Range(0, amount).Select(_ => this.Generator((int) dice)).ToList();
+        private IList<int> RollDice(int amount, DiceType dice) => Enumerable.Range(0, amount).Select(_ => this.Generator((int)dice)).ToList();
 
         partial void DefineRandomGenerator();
     }

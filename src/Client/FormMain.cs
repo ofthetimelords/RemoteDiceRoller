@@ -50,36 +50,8 @@ namespace TheQ.RemoteDiceRoller
             var port = string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["ServerPort"]) ? 5001 : int.Parse(ConfigurationManager.AppSettings["ServerPort"]);
             var authKey = ConfigurationManager.AppSettings["AuthKey"];
 
-            this.DefaultToken.Cancel();
-            this.Connect.Enabled = false;
-            this.ChangeConnectionStatus(false);
-
-            if (this.OutgoingSocket != null)
-            {
-                this.OutgoingSocket.Close();
-                this.OutgoingSocket.Dispose();
-                this.CurrentState = new ClientState();
-            }
-
-            this.OutgoingSocket = new TcpClient();
-
-            try
-            {
-                await this.OutgoingSocket.ConnectAsync(url, port);
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Server didn't respond; connection failed", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (await this.PrepareConnection(url, port))
                 return;
-            }
-
-            this.OutgoingSocket.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-            this.OutgoingSocket.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
-            this.OutgoingSocket.NoDelay = true;
-            this.Connect.Enabled = true;
-            this.DefaultToken = new CancellationTokenSource();
-            this.Dice.Enabled = true;
-
 
             try
             {
@@ -129,16 +101,48 @@ namespace TheQ.RemoteDiceRoller
             catch (Exception ex)
             {
                 this.DefaultToken.Cancel();
+                this.DefaultToken.Dispose();
 
                 if (this.IsDisposed)
                     return;
 
                 this.AddToLog($"Server: Unhandled exception: {ex.Message}");
-                this.Dice.Enabled = false;
                 this.ChangeConnectionStatus(false);
             }
         }
 
+        private async Task<bool> PrepareConnection(string url, int port)
+        {
+            if (!this.DefaultToken.IsCancellationRequested)
+                this.DefaultToken.Cancel();
+
+            this.ChangeConnectionStatus(false);
+
+            if (this.OutgoingSocket != null)
+            {
+                this.OutgoingSocket.Close();
+                this.OutgoingSocket.Dispose();
+                this.CurrentState = new ClientState();
+            }
+
+            this.OutgoingSocket = new TcpClient();
+
+            try
+            {
+                await this.OutgoingSocket.ConnectAsync(url, port);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Server didn't respond; connection failed", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            this.OutgoingSocket.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            this.OutgoingSocket.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
+            this.OutgoingSocket.NoDelay = true;
+            this.DefaultToken = new CancellationTokenSource();
+            return true;
+        }
 
         private void ChangeConnectionStatus(bool connected)
         {
@@ -146,11 +150,17 @@ namespace TheQ.RemoteDiceRoller
             {
                 this.ConnStatus.ForeColor = Color.Red;
                 this.ConnStatus.Text = "Disconnected";
+                this.Connect.Enabled = false;
+                this.Connect.Text = "Connect";
+                this.Dice.Enabled = false;
             }
             else
             {
+                this.Dice.Enabled = true;
                 this.ConnStatus.ForeColor = Color.Lime;
                 this.ConnStatus.Text = "Connected";
+                this.Connect.Enabled = true;
+                this.Connect.Text = "Reconnect";
             }
         }
 
@@ -160,7 +170,7 @@ namespace TheQ.RemoteDiceRoller
             foreach (var die in results)
             {
                 var face = new DiceFace();
-                face.Height = face.Width = this.DiceResults.Height > 120 ? 120 : this.DiceResults.Height - 10;
+                face.Height = face.Width = this.DiceResults.Height > 200 ? 200 : this.DiceResults.Height - 10;
                 face.SetNumber(dice, die);
                 this.DiceResults.Controls.Add(face);
             }

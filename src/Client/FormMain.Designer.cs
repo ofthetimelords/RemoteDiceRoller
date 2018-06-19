@@ -63,6 +63,8 @@
             this.label9 = new System.Windows.Forms.Label();
             this.LastRollSum = new System.Windows.Forms.TextBox();
             this.ConnStatus = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.D4Amount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.D6Amount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.D8Amount)).BeginInit();
@@ -93,9 +95,9 @@
             this.TempLabel.AutoSize = true;
             this.TempLabel.Location = new System.Drawing.Point(12, 60);
             this.TempLabel.Name = "TempLabel";
-            this.TempLabel.Size = new System.Drawing.Size(35, 13);
+            this.TempLabel.Size = new System.Drawing.Size(60, 13);
             this.TempLabel.TabIndex = 1;
-            this.TempLabel.Text = "Name";
+            this.TempLabel.Text = "Your Name";
             // 
             // DiceResults
             // 
@@ -104,9 +106,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DiceResults.AutoScroll = true;
             this.DiceResults.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("DiceResults.BackgroundImage")));
-            this.DiceResults.Location = new System.Drawing.Point(4, 102);
+            this.DiceResults.Location = new System.Drawing.Point(93, 102);
             this.DiceResults.Name = "DiceResults";
-            this.DiceResults.Size = new System.Drawing.Size(869, 97);
+            this.DiceResults.Size = new System.Drawing.Size(780, 97);
             this.DiceResults.TabIndex = 3;
             // 
             // SysLog
@@ -418,12 +420,11 @@
             this.TextName.Name = "TextName";
             this.TextName.Size = new System.Drawing.Size(75, 20);
             this.TextName.TabIndex = 9;
-            this.TextName.Text = "?";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(646, 49);
+            this.label8.Location = new System.Drawing.Point(681, 49);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(66, 13);
             this.label8.TabIndex = 1;
@@ -431,10 +432,12 @@
             // 
             // LastRollBy
             // 
-            this.LastRollBy.Location = new System.Drawing.Point(710, 46);
+            this.LastRollBy.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.LastRollBy.Location = new System.Drawing.Point(753, 46);
             this.LastRollBy.Name = "LastRollBy";
             this.LastRollBy.ReadOnly = true;
-            this.LastRollBy.Size = new System.Drawing.Size(100, 20);
+            this.LastRollBy.Size = new System.Drawing.Size(120, 20);
             this.LastRollBy.TabIndex = 9;
             // 
             // label9
@@ -448,6 +451,8 @@
             // 
             // LastRollSum
             // 
+            this.LastRollSum.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.LastRollSum.BackColor = System.Drawing.SystemColors.ControlText;
             this.LastRollSum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.LastRollSum.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
@@ -455,7 +460,7 @@
             this.LastRollSum.Location = new System.Drawing.Point(753, 74);
             this.LastRollSum.Name = "LastRollSum";
             this.LastRollSum.ReadOnly = true;
-            this.LastRollSum.Size = new System.Drawing.Size(57, 22);
+            this.LastRollSum.Size = new System.Drawing.Size(120, 22);
             this.LastRollSum.TabIndex = 9;
             // 
             // ConnStatus
@@ -470,11 +475,29 @@
             this.ConnStatus.Text = "Disconnected";
             this.ConnStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(12, 121);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(75, 20);
+            this.textBox1.TabIndex = 12;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(12, 105);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(66, 13);
+            this.label10.TabIndex = 11;
+            this.label10.Text = "Room Name";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(876, 201);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.ConnStatus);
             this.Controls.Add(this.LastRollSum);
             this.Controls.Add(this.LastRollBy);
@@ -542,6 +565,8 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox LastRollSum;
         private System.Windows.Forms.Label ConnStatus;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label10;
     }
 }
 
