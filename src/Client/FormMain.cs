@@ -154,6 +154,12 @@ namespace TheQ.RemoteDiceRoller
             }
         }
 
+        private void SaveSettings()
+        {
+            ConfigurationManager.AppSettings["Name"] = this.TextName.Text;
+            //ConfigurationManager.AppSettings["Room"] = this.TextRoom.Text;
+        }
+
         private void ShowDice(IList<int> results, DiceType dice)
         {
             this.DiceResults.Controls.Clear();

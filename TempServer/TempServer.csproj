@@ -8,7 +8,7 @@
 	  <RootNamespace>TheQ.DiceRoller.TempServer</RootNamespace>
   </PropertyGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties appconfig_1json__JSONSchema="http://json.schemastore.org/appsettings" appsettings_1json__JSONSchema="http://json.schemastore.org/appsettings" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="http://json.schemastore.org/appsettings" /></VisualStudio></ProjectExtensions>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.0" />
