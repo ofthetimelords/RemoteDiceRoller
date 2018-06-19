@@ -22,7 +22,7 @@ namespace TheQ.DiceRoller.Shared
             return true;
         }
 
-        public static async Task<string> WaitForReply(this TcpClient client, CancellationToken token)
+        public static async Task<IList<string>> WaitForReplies(this TcpClient client, CancellationToken token)
         {
             if (!client.Connected)
                 return null;
@@ -56,7 +56,10 @@ namespace TheQ.DiceRoller.Shared
                         Array.Copy(buffer, 0, message, oldPos, read);
 
                         if (message[position] == 4)
-                            return Encoding.UTF8.GetString(message, 0, position);
+                        {
+                            var response = Encoding.UTF8.GetString(message, 0, position);
+                            return response.Split((char) 4);
+                        }
                     }
                     else
                         await Task.Delay(500, combinedToken.Token);

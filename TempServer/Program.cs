@@ -81,31 +81,37 @@ namespace TheQ.DiceRoller.TempServer
                             {
                                 Console.WriteLine("Requesting that client authenticates");
                                 await input.SendMessage("#AUTH#", CancellationToken.None);
-                                var response = await input.WaitForReply(CancellationToken.None);
+                                var response = await input.WaitForReplies(CancellationToken.None);
 
                                 Console.WriteLine($"Client responded with {response}");
-                                if (response == this.AuthKey)
+                                if (response.Last() == this.AuthKey) // TODO: Ugly
                                     state.CurrentState = State.MustIdentify;
                                 else
-                                    await input.SendMessage("#DISCONNECTED#", CancellationToken.None);
+                                {
+                                    await this.DisconnectClient(input);
+                                    return;
+                                }
+
                                 break;
                             }
                             case State.MustIdentify:
                             {
                                 Console.WriteLine("Client must declare an ID");
                                 await input.SendMessage("#ID#", CancellationToken.None);
-                                var response = await input.WaitForReply(CancellationToken.None);
+                                var response = await input.WaitForReplies(CancellationToken.None);
 
                                 Console.WriteLine($"Client responded with {response}");
                                 state.CurrentState = State.Ready;
-                                state.Id = response;
+                                state.Id = response.Last();
 
                                 await input.SendMessage("#CONNECTED#", CancellationToken.None);
+                                await Task.WhenAll(this.Connections.Where(c => c.Value.CurrentState == State.Ready && c.Key.Connected).Select(conn => conn.Key.SendMessage("#CONNECTEDCLIENT#" + state.Id, CancellationToken.None)));
+
                                 break;
                             }
                             case State.Ready:
                             {
-                                var response = await input.WaitForReply(CancellationToken.None);
+                                var response = (await input.WaitForReplies(CancellationToken.None)).Last();
                                 Console.WriteLine($"Client {state.Id} sent a command: {response}");
 
                                 if (response.StartsWith("#ROLL#"))
@@ -129,8 +135,7 @@ namespace TheQ.DiceRoller.TempServer
                                     {
                                         try
                                         {
-                                            this.Connections.TryRemove(disconnected.Key, out var value);
-                                            disconnected.Key.Close();
+                                            await this.DisconnectClient(disconnected.Key);
                                         }
                                         catch (Exception)
                                         {
@@ -146,10 +151,16 @@ namespace TheQ.DiceRoller.TempServer
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Unhandled exception: {ex.Message} by {(input.Connected ? input.Client?.RemoteEndPoint.ToString() : "?")} - {state.Id}. Disconnecting this client!");
-                    input.Close();
-                    this.Connections.TryRemove(input, out var value);
+                    await this.DisconnectClient(input);
                 }
             }
+        }
+
+        private async Task DisconnectClient(TcpClient input)
+        {
+            input.Close();
+            this.Connections.TryRemove(input, out var value);
+            await Task.WhenAll(this.Connections.Where(c => c.Value.CurrentState == State.Ready && c.Key.Connected).Select(conn => conn.Key.SendMessage("#DISCONNECTEDCLIENT#" + conn.Value.Id, CancellationToken.None)));
         }
 
         private Random Rnd = new Random();
