@@ -1,4 +1,6 @@
 # RemoteDiceRoller
+![Screenshot](https://github.com/ofthetimelords/RemoteDiceRoller/blob/master/sshot.png)
+
 _Warning: Still an unrefactored prototype, proceed at your own peril!_
 
 I needed a way to be able to roll dice for our remote RPG campaign, without relying on 3rd party applications (that have way more features than I need).
